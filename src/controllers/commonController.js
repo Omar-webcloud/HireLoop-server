@@ -32,9 +32,17 @@ async function getJobs(req, res) {
     const jobs = await db.collection("jobs").find(query).sort({ createdAt: -1 }).toArray();
     res.json(jobs.map(j => ({ ...j, id: j._id.toString(), _id: undefined })));
   } catch (error) {
-    console.error("Error fetching jobs:", error);
-    res.status(500).json({ error: "Server error" });
+    console.error("Error fetching jobs:", {
+      message: error?.message,
+      stack: error?.stack,
+      query: req?.query
+    });
+    res.status(500).json({
+      error: "Server error",
+      details: error?.message || ""
+    });
   }
+
 }
 
 // Get single job details by ID
