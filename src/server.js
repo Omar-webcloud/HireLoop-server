@@ -1,4 +1,3 @@
-// /HireLoop-server/src/server.js
 require('dotenv').config();
 const express = require('express');
 const { connectDb } = require('./config/db');
@@ -6,11 +5,24 @@ const cors = require('cors');
 
 const app = express();
 
-// Middleware
+// ✅ Fixed: CORS origin should be the frontend URL, not the backend's own URL
+const allowedOrigins = [
+  process.env.FRONTEND_URL || 'http://localhost:3000',
+  'https://hireloop-jobs.vercel.app',
+];
+
 app.use(cors({
-  origin: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
-  credentials: true
+  origin: (origin, callback) => {
+    // Allow requests with no origin (server-to-server / curl)
+    if (!origin || allowedOrigins.some(o => origin.startsWith(o))) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS: origin ${origin} not allowed`));
+    }
+  },
+  credentials: true,
 }));
+
 app.use(express.json());
 
 // Routes
