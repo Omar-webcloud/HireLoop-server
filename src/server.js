@@ -1,36 +1,30 @@
-const express = require("express");
-const cors = require("cors");
-const { connectDb } = require("./config/db");
-require("dotenv").config();
+// /HireLoop-server/src/server.js
+require('dotenv').config();
+const express = require('express');
+const { connectDb } = require('./config/db');
+const cors = require('cors');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
+  origin: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
   credentials: true
 }));
 app.use(express.json());
 
 // Routes
-app.use("/api", require("./routes/common"));
-app.use("/api/seeker", require("./routes/seeker"));
-app.use("/api/recruiter", require("./routes/recruiter"));
-app.use("/api/admin", require("./routes/admin"));
+app.use('/api/seeker', require('./routes/seeker'));
+app.use('/api/recruiter', require('./routes/recruiter'));
+app.use('/api/admin', require('./routes/admin'));
+app.use('/api/common', require('./routes/common'));
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error("Unhandled error:", err);
-  res.status(500).json({ error: "Something went wrong!" });
-});
-
-// Connect DB & Start Server
+// Connect DB and start server
 connectDb().then(() => {
+  const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => {
-    console.log(`HireLoop server listening at http://localhost:${PORT}`);
+    console.log(`Server running on port ${PORT}`);
   });
-}).catch(err => {
-  console.error("Database connection failed. Exiting server...", err);
-  process.exit(1);
 });
+
+module.exports = app;
